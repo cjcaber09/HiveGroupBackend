@@ -13,9 +13,10 @@ const Register = async (req, res) => {
 const Login = async (req, res) => {
   let Inputs = req.body;
   UserService.loginUser(Inputs.username, Inputs.password)
-    .then((result) => {
+    .then(async (result) => {
       if (result) {
-        res.status(200).json({ token: result });
+        let user = await UserService.fetchUserbyToken(result);
+        res.status(200).json({ token: result, user });
       }
     })
     .catch((err) => {

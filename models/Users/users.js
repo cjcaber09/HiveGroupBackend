@@ -49,6 +49,10 @@ const UserSchema = new schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Users",
       },
+      status: {
+        type: String,
+        required: true,
+      },
       dateCreated: {
         type: Date,
         default: Date.now(),

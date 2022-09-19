@@ -3,6 +3,7 @@ const Profile = require("../models/Users/profile");
 const Users = require("../models/Users/users");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const _ = require("underscore");
 
 const UserService = function () {
   this.loginUser = (username, password) => {
@@ -67,8 +68,69 @@ const UserService = function () {
       let users = await Users.find()
         .populate("contact_details")
         .populate("profile_details")
+        .populate("friends")
         .populate("address_details");
       if (users) resolve(users);
+    });
+  };
+  this.changeType = (changeType, currentRank, userId) => {
+    return new Promise((resolve, reject) => {
+      let typesByRank = ["user", "supervisor", "admin"];
+      let typeIndex = typesByRank.findIndex((rank) => rank == currentRank);
+      let newRankIndex =
+        changeType == "promote" ? typeIndex + 1 : typeIndex - 1;
+      let changedType = Users.findOneAndUpdate(
+        { _id: userId },
+        {
+          type: typesByRank[newRankIndex],
+        }
+      );
+      if (changedType) {
+        resolve(changedType);
+      }
+    });
+  };
+  this.requestFriend = (currentUserId, requestedUser) => {
+    return new Promise(async (resolve, reject) => {
+      // set requestedUser as User
+      let requestUserSchema = new Users(requestedUser);
+      // add friend for currentUser
+      let CUAddedFriend = await Users.findOneAndUpdate(
+        {
+          _id: currentUserId,
+          "friends.friend_id": {
+            $ne: requestUserSchema._id,
+          },
+        },
+        {
+          $push: {
+            friends: {
+              friend_id: requestUserSchema,
+              status: "pending",
+            },
+          },
+        }
+      );
+
+      // add friend for requestedUser
+      if (CUAddedFriend) {
+        let RUAddedFriend = await Users.findOneAndUpdate(
+          {
+            _id: requestUserSchema._id,
+            "friends.friend_id": {
+              $ne: CUAddedFriend._id,
+            },
+          },
+          {
+            $addToSet: {
+              friends: { friend_id: CUAddedFriend._id, status: "pending" },
+            },
+          }
+        );
+        resolve(CUAddedFriend);
+      } else {
+        reject({ message: "Duplicate record" });
+      }
     });
   };
 };
