@@ -6,6 +6,8 @@ const TokenValidation = async (req, res, next) => {
   let result = jwt.decode(tokenArr[1]);
   if (result) {
     next();
+  } else {
+    res.status(401).json("User unauthenticated");
   }
 };
 

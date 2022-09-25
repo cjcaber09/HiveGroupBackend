@@ -12,9 +12,7 @@ app.use(express.json());
 app.use(cors());
 app.use("/api", RouterIndex);
 
-mongoose.connect(process.env.DB_SERVER, (result) => {
-  console.log("Connected to Mongodb");
-});
+mongoose.connect(process.env.DB_SERVER);
 
 app.listen(process.env.PORT, () =>
   console.log("Listening to port " + process.env.PORT)

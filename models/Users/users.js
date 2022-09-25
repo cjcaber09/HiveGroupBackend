@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const schema = mongoose.Schema;
-
+const Friends = require("./friends");
 const UserSchema = new schema({
   username: {
     type: String,
@@ -43,22 +43,7 @@ const UserSchema = new schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "image-profiles",
   },
-  friends: [
-    {
-      friend_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
-      },
-      status: {
-        type: String,
-        required: true,
-      },
-      dateCreated: {
-        type: Date,
-        default: Date.now(),
-      },
-    },
-  ],
+  friendLists: [{ type: mongoose.Schema.Types.ObjectId, ref: Friends }],
 });
 
 module.exports = mongoose.model("users", UserSchema);
